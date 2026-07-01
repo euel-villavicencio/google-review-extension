@@ -15,7 +15,7 @@ import {
 import "./styles.css";
 
 const defaults = {
-  backendUrl: "https://your-heroku-app.herokuapp.com",
+  backendUrl: "https://gay-duck-jeznag-2d148b61.koyeb.app/",
   crmOrgId: "",
   apiKey: "",
   reviewOpenSyncUrl: "",
@@ -27,7 +27,7 @@ const defaults = {
   followUpDays: "7"
 };
 
-const productionBackendUrl = "https://your-heroku-app.herokuapp.com";
+const productionBackendUrl = "https://gay-duck-jeznag-2d148b61.koyeb.app/";
 const backendAccessKeyVariables = [
   "googlereview__Backend_Access_Key",
   "googlereview__API_Key",

@@ -3,7 +3,7 @@
   "service": "CRM",
   "storage": false,
   "whiteListedDomains": [
-    "https://your-heroku-app.herokuapp.com"
+    "https://gay-duck-jeznag-2d148b61.koyeb.app"
   ],
   "modules": {
     "widgets": [
