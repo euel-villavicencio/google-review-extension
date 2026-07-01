@@ -1,0 +1,9 @@
+node_modules/
+.env
+backend-python/.env
+backend-python/.venv/
+__pycache__/
+*.pyc
+widget-src/dist/
+zoho-widget-package/app/assets/
+*.zip

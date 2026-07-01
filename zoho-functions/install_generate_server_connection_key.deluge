@@ -1,0 +1,62 @@
+// Install Action
+// Purpose: create a per-org Server Connection Key automatically during extension install.
+// Custom Property required:
+//   Field Name: Server Connection Key
+//   API Name: Backend_Access_Key
+//   Visibility: Hidden
+//   Field Name: Review Open Sync URL
+//   API Name: Review_Open_Sync_URL
+//   Visibility: Hidden
+
+org_id = "";
+if(installParamMap != null)
+{
+	org_id = ifnull(installParamMap.get("organizationId"), "");
+}
+
+existing_key = zoho.crm.getOrgVariable("googlereview__Backend_Access_Key");
+if(existing_key != null && existing_key != "")
+{
+	info "Google Review Link server connection key already exists.";
+}
+else
+{
+	seed = org_id + "-" + zoho.currenttime.toString("yyyyMMddHHmmssSSS") + "-" + randomNumber(100000000, 999999999).toString();
+	server_connection_key = zoho.encryption.sha256(seed);
+
+	value_map = Map();
+	value_map.put("apiname", "googlereview__Backend_Access_Key");
+	value_map.put("value", server_connection_key);
+
+	response = zoho.crm.invokeConnector("crm.set", value_map);
+	info response;
+	info "Google Review Link server connection key created.";
+}
+
+sync_url = zoho.crm.getOrgVariable("googlereview__Review_Open_Sync_URL");
+if(sync_url != null && sync_url != "")
+{
+	info "Google Review Link open sync URL already exists.";
+}
+else
+{
+	zapi_request = Map();
+	zapi_request.put("nameSpace", "googlereview");
+	zapi_response = zoho.crm.invokeConnector("crm.zapikey", zapi_request);
+	zapi_key = zapi_response.get("response");
+	if(zapi_key != null && zapi_key != "")
+	{
+		rest_function_url = "https://www.zohoapis.com/crm/v7/functions/googlereview__sync_review_open_from_backend/actions/execute?auth_type=apikey&zapikey=" + zapi_key;
+		url_map = Map();
+		url_map.put("apiname", "googlereview__Review_Open_Sync_URL");
+		url_map.put("value", rest_function_url);
+		url_response = zoho.crm.invokeConnector("crm.set", url_map);
+		info url_response;
+		info "Google Review Link open sync URL created.";
+	}
+	else
+	{
+		info zapi_response;
+		info "Google Review Link could not create the open sync URL.";
+	}
+}

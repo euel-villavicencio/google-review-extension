@@ -1,0 +1,25 @@
+{
+  "name": "google-review-extension",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Zoho CRM widget build tooling for the Google Review Link extension. The production-aligned backend lives in backend-python.",
+  "scripts": {
+    "backend:dev": "cd backend-python && python app.py",
+    "backend:test": "python -m py_compile backend-python/app.py",
+    "widget:build": "vite build --config widget-src/vite.config.js",
+    "widget:zip": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-widget.ps1",
+    "widget:zet": "npm run widget:build && powershell -NoProfile -ExecutionPolicy Bypass -Command \"Copy-Item -Force zoho-widget-package/app/index.html zoho-widget-package/app/widget.html; Copy-Item -Force zoho-widget-package/app/index.html zoho-widget-package/app/dashboard.html; Set-Location zoho-widget-package; zet validate; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; zet pack; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; Copy-Item -Force dist/zoho-widget-package.zip ../google-review-settings-widget-ZET.zip\"",
+    "build": "npm run widget:build && npm run widget:zip"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^5.0.0",
+    "vite": "^7.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "lucide-react": "^0.468.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

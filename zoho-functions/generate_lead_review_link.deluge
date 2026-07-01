@@ -1,0 +1,82 @@
+// Arguments:
+// lead_id: map this to the current Lead record ID in the button configuration.
+
+backend_url = "https://your-heroku-app.herokuapp.com";
+lead_id = lead.get("id");
+
+org_params = Map();
+org_response = zoho.crm.invokeConnector("crm.getorg", org_params);
+org_data = org_response.get("response").get("org").get(0);
+crm_org_id = ifnull(org_data.get("zgid"), ifnull(org_data.get("id"), org_data.get("primary_zuid")));
+api_key = zoho.crm.getOrgVariable("googlereview__Backend_Access_Key");
+
+if(crm_org_id == null || crm_org_id == "")
+{
+	return "Google Review Link could not detect the Zoho CRM org ID.";
+}
+if(api_key == null || api_key == "")
+{
+	return "Google Review Link is missing the Server Connection Key from extension setup.";
+}
+if(lead_id == null || lead_id == "")
+{
+	return "Lead ID was not found. Check the button argument mapping.";
+}
+current_record = zoho.crm.getRecordById("Leads", lead_id.toLong());
+record_name = ifnull(current_record.get("Full_Name"), "");
+if(record_name == "")
+{
+	first_name = ifnull(current_record.get("First_Name"), "");
+	last_name = ifnull(current_record.get("Last_Name"), "");
+	record_name = (first_name + " " + last_name).trim();
+}
+
+headers = Map();
+headers.put("content-type", "application/json");
+headers.put("x-crm-org-id", crm_org_id.toString());
+headers.put("x-api-key", api_key.toString());
+
+body = Map();
+body.put("module_api_name", "Leads");
+body.put("crm_record_id", lead_id.toString());
+body.put("crm_record_name", record_name);
+
+response = invokeurl
+[
+	url : backend_url + "/review_links"
+	type : POST
+	parameters : body.toString()
+	headers : headers
+];
+
+info response;
+if(response.get("review_link") != null)
+{
+	update_fields = Map();
+	update_fields.put("googlereview__Google_Review_Link", response.get("review_link"));
+	current_status = ifnull(current_record.get("googlereview__Review_Page_Open_Status"), "");
+	response_fields = response.get("fields");
+	if(response_fields != null)
+	{
+		open_status = response_fields.get("Review_Page_Open_Status");
+		open_count = response_fields.get("Review_Page_Open_Count");
+		if(current_status != "Review Left" && open_status != null && open_status != "")
+		{
+			update_fields.put("googlereview__Review_Page_Open_Status", open_status);
+		}
+		if(open_count != null)
+		{
+			update_fields.put("googlereview__Review_Page_Open_Count", open_count);
+		}
+	}
+	update_response = zoho.crm.updateRecord("Leads", lead_id.toLong(), update_fields);
+	info update_response;
+	response_code = update_response.get("code");
+	response_status = update_response.get("status");
+	if((response_code != null && response_code != "SUCCESS") || response_status == "error")
+	{
+		return "Google review link was generated, but Zoho did not update the fields: " + update_response.toString();
+	}
+	return "Google review link generated.";
+}
+return "Could not generate Google review link. Please check extension setup.";

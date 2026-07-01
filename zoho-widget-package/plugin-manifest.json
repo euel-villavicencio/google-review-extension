@@ -1,0 +1,17 @@
+{
+  "locale": ["en"],
+  "service": "CRM",
+  "storage": false,
+  "whiteListedDomains": [
+    "https://your-heroku-app.herokuapp.com"
+  ],
+  "modules": {
+    "widgets": [
+      {
+        "location": "settings",
+        "name": "Google Review Settings",
+        "url": "/app/widget.html"
+      }
+    ]
+  }
+}

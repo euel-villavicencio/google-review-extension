@@ -1,0 +1,85 @@
+// Schedule Function
+// Purpose: create Zoho Tasks for review links that were generated but not opened.
+// Recommended schedule: once per day.
+
+backend_url = "https://your-heroku-app.herokuapp.com";
+days_since_generated = 7;
+
+org_params = Map();
+org_response = zoho.crm.invokeConnector("crm.getorg", org_params);
+org_data = org_response.get("response").get("org").get(0);
+crm_org_id = ifnull(org_data.get("zgid"), ifnull(org_data.get("id"), org_data.get("primary_zuid")));
+api_key = zoho.crm.getOrgVariable("googlereview__Backend_Access_Key");
+
+if(crm_org_id == null || crm_org_id == "")
+{
+	info "Google Review Link could not detect the Zoho CRM org ID.";
+}
+else if(api_key == null || api_key == "")
+{
+	info "Google Review Link is missing the Server Connection Key from extension setup.";
+}
+else
+{
+	headers = Map();
+	headers.put("content-type", "application/json");
+	headers.put("x-crm-org-id", crm_org_id.toString());
+	headers.put("x-api-key", api_key.toString());
+
+	unopened_response = invokeurl
+	[
+		url : backend_url + "/review_links/unopened?days=" + days_since_generated.toString()
+		type : GET
+		headers : headers
+	];
+
+	records = unopened_response.get("records");
+	results = List();
+	if(records != null)
+	{
+		for each item in records
+		{
+			module_api_name = item.get("module_api_name");
+			crm_record_id = item.get("crm_record_id");
+			result = Map();
+			result.put("module_api_name", module_api_name);
+			result.put("crm_record_id", crm_record_id);
+			try
+			{
+				task_map = Map();
+				task_map.put("Subject", "Follow up for Google review request");
+				task_map.put("Status", "Not Started");
+				task_map.put("Priority", "Normal");
+				task_map.put("Due_Date", zoho.currentdate.toString("yyyy-MM-dd"));
+				related_record = Map();
+				related_record.put("id", crm_record_id);
+				task_map.put("What_Id", related_record);
+				task_map.put("$se_module", module_api_name);
+				task_response = zoho.crm.createRecord("Tasks", task_map);
+				info task_response;
+				result.put("status", "created");
+			}
+			catch(e)
+			{
+				result.put("status", "failed");
+				result.put("error", e.toString());
+				info e;
+			}
+			results.add(result);
+		}
+	}
+
+	if(results.size() > 0)
+	{
+		mark_body = Map();
+		mark_body.put("records", results);
+		mark_response = invokeurl
+		[
+			url : backend_url + "/review_links/followups/mark_created"
+			type : POST
+			parameters : mark_body.toString()
+			headers : headers
+		];
+		info mark_response;
+	}
+}

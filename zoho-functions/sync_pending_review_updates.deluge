@@ -1,0 +1,122 @@
+// Schedule Function
+// Purpose: pull customer-open tracking events from the hosted backend and update this Zoho CRM org.
+// Recommended schedule: every 5 to 15 minutes.
+
+backend_url = "https://your-heroku-app.herokuapp.com";
+
+org_params = Map();
+org_response = zoho.crm.invokeConnector("crm.getorg", org_params);
+org_data = org_response.get("response").get("org").get(0);
+crm_org_id = ifnull(org_data.get("zgid"), ifnull(org_data.get("id"), org_data.get("primary_zuid")));
+api_key = zoho.crm.getOrgVariable("googlereview__Backend_Access_Key");
+
+if(crm_org_id == null || crm_org_id == "")
+{
+	info "Google Review Link could not detect the Zoho CRM org ID.";
+}
+else if(api_key == null || api_key == "")
+{
+	info "Google Review Link is missing the Server Connection Key from extension setup.";
+}
+else
+{
+	headers = Map();
+	headers.put("content-type", "application/json");
+	headers.put("x-crm-org-id", crm_org_id.toString());
+	headers.put("x-api-key", api_key.toString());
+
+	pending_response = invokeurl
+	[
+		url : backend_url + "/crm_updates/pending?limit=50"
+		type : GET
+		headers : headers
+	];
+
+	records = pending_response.get("records");
+	if(records == null)
+	{
+		info pending_response;
+	}
+	else
+	{
+		for each update_item in records
+		{
+			update_id = update_item.get("id");
+			module_api_name = update_item.get("module_api_name");
+			crm_record_id = update_item.get("crm_record_id");
+			event_type = update_item.get("event_type");
+			error_message = "";
+			status_to_mark = "synced";
+			try
+			{
+				record_data = zoho.crm.getRecordById(module_api_name, crm_record_id.toLong());
+				current_status = ifnull(record_data.get("googlereview__Review_Page_Open_Status"), "");
+
+				update_fields = Map();
+				review_link = update_item.get("review_link");
+				if(review_link != null && review_link != "")
+				{
+					update_fields.put("googlereview__Google_Review_Link", review_link);
+				}
+
+				if(event_type == "review_link_generated")
+				{
+					if(current_status == "")
+					{
+						update_fields.put("googlereview__Review_Page_Open_Status", "Not Opened");
+						update_fields.put("googlereview__Review_Page_Open_Count", 0);
+					}
+				}
+				else if(event_type == "review_page_opened")
+				{
+					open_count = update_item.get("open_count");
+					opened_at = update_item.get("opened_at");
+					open_status = update_item.get("review_page_open_status");
+					if(open_count != null)
+					{
+						update_fields.put("googlereview__Review_Page_Open_Count", open_count);
+					}
+					if(opened_at != null && opened_at != "")
+					{
+						update_fields.put("googlereview__Last_Review_Page_Opened_At", opened_at);
+					}
+					if(current_status != "Review Left" && open_status != null && open_status != "")
+					{
+						update_fields.put("googlereview__Review_Page_Open_Status", open_status);
+					}
+				}
+
+				if(update_fields.size() > 0)
+				{
+					update_response = zoho.crm.updateRecord(module_api_name, crm_record_id.toLong(), update_fields);
+					info update_response;
+					response_code = update_response.get("code");
+					response_status = update_response.get("status");
+					if((response_code != null && response_code != "SUCCESS") || response_status == "error")
+					{
+						status_to_mark = "failed";
+						error_message = "updateRecord rejected " + update_response.toString();
+					}
+				}
+			}
+			catch(e)
+			{
+				status_to_mark = "failed";
+				error_message = e.toString();
+				info error_message;
+			}
+
+			mark_body = Map();
+			mark_body.put("status", status_to_mark);
+			mark_body.put("error_message", error_message);
+			mark_response = invokeurl
+			[
+				url : backend_url + "/crm_updates/" + update_id.toString() + "/status"
+				type : POST
+				parameters : mark_body.toString()
+				headers : headers
+			];
+			info mark_response;
+		}
+	}
+}
