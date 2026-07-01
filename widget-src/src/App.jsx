@@ -31,12 +31,15 @@ const productionBackendUrl = "https://gay-duck-jeznag-2d148b61.koyeb.app/";
 const backendAccessKeyVariables = [
   "googlereview__Backend_Access_Key",
   "googlereview__API_Key",
+  "googlereviewlink__Backend_Access_Key",
+  "googlereviewlink__API_Key",
   "Backend_Access_Key",
   "Google_Review_API_Key",
   "API_Key"
 ];
 const reviewOpenSyncUrlVariables = [
   "googlereview__Review_Open_Sync_URL",
+  "googlereviewlink__Review_Open_Sync_URL",
   "Review_Open_Sync_URL"
 ];
 const errorMessages = {
@@ -260,6 +263,64 @@ function App() {
     }
   }
 
+  async function createFollowUpTasks() {
+    setBusy("createFollowups");
+    setMessage(null);
+
+    try {
+      const days = Math.max(0, Number(config.followUpDays || 0));
+      const currentFollowUps = followUps || await apiRequest(config, `/review_links/unopened?days=${encodeURIComponent(days)}`);
+      const records = currentFollowUps.records || [];
+      setFollowUps(currentFollowUps);
+
+      if (records.length === 0) {
+        setMessage({ type: "success", text: "No unopened review links need follow-up tasks." });
+        return;
+      }
+
+      const results = [];
+      for (const record of records) {
+        try {
+          await createZohoFollowUpTask(record);
+          results.push({
+            module_api_name: record.module_api_name,
+            crm_record_id: record.crm_record_id,
+            status: "created"
+          });
+        } catch (error) {
+          results.push({
+            module_api_name: record.module_api_name,
+            crm_record_id: record.crm_record_id,
+            status: "failed",
+            error: error.message
+          });
+        }
+      }
+
+      await apiRequest(config, "/review_links/followups/mark_created", {
+        method: "POST",
+        body: { records: results }
+      });
+
+      const createdCount = results.filter((record) => record.status === "created").length;
+      const failedCount = results.length - createdCount;
+      const refreshedFollowUps = await apiRequest(config, `/review_links/unopened?days=${encodeURIComponent(days)}`);
+      const refreshedDashboard = await apiRequest(config, "/dashboard/stats");
+      setFollowUps(refreshedFollowUps);
+      setDashboard(refreshedDashboard);
+      setMessage({
+        type: failedCount ? "error" : "success",
+        text: failedCount
+          ? `${createdCount} follow-up task${createdCount === 1 ? "" : "s"} created, ${failedCount} failed.`
+          : `${createdCount} follow-up task${createdCount === 1 ? "" : "s"} created.`
+      });
+    } catch (error) {
+      setMessage({ type: "error", text: error.message });
+    } finally {
+      setBusy(null);
+    }
+  }
+
   async function loadDashboard() {
     setBusy("dashboard");
     setMessage(null);
@@ -293,6 +354,26 @@ function App() {
 
         <section className="panel dashboard-panel dashboard-page-panel">
           <DashboardStats data={dashboard} preview={linkPreview} />
+        </section>
+
+        <section className="panel dashboard-page-panel">
+          <PanelTitle icon={Search} title="Follow-ups" caption="Find generated links that have not been opened and create Zoho Tasks." />
+
+          <div className="follow-row">
+            <Field label="Days Since Link Generated">
+              <input value={config.followUpDays} onChange={(event) => updateConfig("followUpDays", event.target.value)} type="number" min="0" />
+            </Field>
+            <button type="button" onClick={loadFollowUps} disabled={busy === "followups"}>
+              {busy === "followups" ? <Loader2 className="spin" size={16} /> : <Search size={16} />}
+              Load
+            </button>
+            <button type="button" className="secondary" onClick={createFollowUpTasks} disabled={busy === "createFollowups"}>
+              {busy === "createFollowups" ? <Loader2 className="spin" size={16} /> : <CheckCircle2 size={16} />}
+              Create Tasks
+            </button>
+          </div>
+
+          <FollowUpList data={followUps} />
         </section>
       </main>
     );
@@ -424,6 +505,10 @@ function App() {
               {busy === "followups" ? <Loader2 className="spin" size={16} /> : <Search size={16} />}
               Load
             </button>
+            <button type="button" className="secondary" onClick={createFollowUpTasks} disabled={busy === "createFollowups"}>
+              {busy === "createFollowups" ? <Loader2 className="spin" size={16} /> : <CheckCircle2 size={16} />}
+              Create Tasks
+            </button>
           </div>
 
           <FollowUpList data={followUps} />
@@ -451,6 +536,31 @@ async function updateZohoReviewLink(moduleApiName, recordId, reviewLink) {
   if (result?.status && String(result.status).toLowerCase() !== "success") {
     const detail = result?.details?.api_name || result?.message || "unknown Zoho error";
     throw new Error(`Zoho could not update the Google Review Link field: ${detail}`);
+  }
+}
+
+async function createZohoFollowUpTask(record) {
+  if (!window.ZOHO?.CRM?.API?.insertRecord) {
+    throw new Error("Zoho task creation API is unavailable. Open this widget from inside Zoho CRM.");
+  }
+
+  const response = await window.ZOHO.CRM.API.insertRecord({
+    Entity: "Tasks",
+    APIData: {
+      Subject: "Follow up for Google review request",
+      Status: "Not Started",
+      Priority: "Normal",
+      Due_Date: new Date().toISOString().slice(0, 10),
+      What_Id: { id: String(record.crm_record_id) },
+      $se_module: record.module_api_name
+    },
+    Trigger: []
+  });
+
+  const result = Array.isArray(response?.data) ? response.data[0] : response?.data;
+  if (result?.status && String(result.status).toLowerCase() !== "success") {
+    const detail = result?.details?.api_name || result?.message || "unknown Zoho error";
+    throw new Error(`Zoho could not create the follow-up task: ${detail}`);
   }
 }
 
