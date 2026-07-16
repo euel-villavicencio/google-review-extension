@@ -8,8 +8,8 @@
     "backend:dev": "cd backend-python && python app.py",
     "backend:test": "python -m py_compile backend-python/app.py",
     "widget:build": "vite build --config widget-src/vite.config.js",
-    "widget:zip": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-widget.ps1",
-    "widget:zet": "npm run widget:build && powershell -NoProfile -ExecutionPolicy Bypass -Command \"Copy-Item -Force zoho-widget-package/app/index.html zoho-widget-package/app/widget.html; Copy-Item -Force zoho-widget-package/app/index.html zoho-widget-package/app/dashboard.html; Set-Location zoho-widget-package; zet validate; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; zet pack; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; Copy-Item -Force dist/zoho-widget-package.zip ../google-review-settings-widget-ZET.zip\"",
+    "widget:zip": "bash scripts/package-widget.sh",
+    "widget:zet": "npm run widget:build && (cp -f zoho-widget-package/app/index.html zoho-widget-package/app/widget.html && cp -f zoho-widget-package/app/index.html zoho-widget-package/app/dashboard.html && cd zoho-widget-package && zet validate && zet pack && cp -f dist/zoho-widget-package.zip ../google-review-settings-widget-ZET.zip)",
     "build": "npm run widget:build && npm run widget:zip"
   },
   "dependencies": {

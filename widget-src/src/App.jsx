@@ -15,7 +15,7 @@ import {
 import "./styles.css";
 
 const defaults = {
-  backendUrl: "https://gay-duck-jeznag-2d148b61.koyeb.app/",
+  backendUrl: "https://greview.koyeb.app/",
   crmOrgId: "",
   apiKey: "",
   reviewOpenSyncUrl: "",
@@ -27,21 +27,10 @@ const defaults = {
   followUpDays: "7"
 };
 
-const productionBackendUrl = "https://gay-duck-jeznag-2d148b61.koyeb.app/";
-const backendAccessKeyVariables = [
-  "googlereview__Backend_Access_Key",
-  "googlereview__API_Key",
-  "googlereviewlink__Backend_Access_Key",
-  "googlereviewlink__API_Key",
-  "Backend_Access_Key",
-  "Google_Review_API_Key",
-  "API_Key"
-];
-const reviewOpenSyncUrlVariables = [
-  "googlereview__Review_Open_Sync_URL",
-  "googlereviewlink__Review_Open_Sync_URL",
-  "Review_Open_Sync_URL"
-];
+const productionBackendUrl = "https://greview.koyeb.app/";
+const backendAccessKey =  "googlereviewlinktracker__Backend_Access_Key";
+const reviewOpenSyncUrl = "googlereviewlinktracker__Review_Open_Sync_URL";
+
 const errorMessages = {
   days_must_be_a_positive_number: "Enter a valid number of days.",
   default_module_api_name_must_be_Leads_or_Contacts: "Choose either Leads or Contacts as the default module.",
@@ -897,22 +886,16 @@ async function hydrateZohoOrgId() {
 }
 
 async function hydrateBackendAccessKey() {
-  for (const variableName of backendAccessKeyVariables) {
-    const value = await getZohoVariable(variableName);
-    if (value) {
-      window.dispatchEvent(new CustomEvent("google-review-api-key-detected", { detail: value }));
-      return;
-    }
+  const value = await getZohoVariable(backendAccessKey);
+  if (value) {
+    window.dispatchEvent(new CustomEvent("google-review-api-key-detected", { detail: value }));
   }
 }
 
 async function hydrateReviewOpenSyncUrl() {
-  for (const variableName of reviewOpenSyncUrlVariables) {
-    const value = await getZohoVariable(variableName);
-    if (value) {
-      window.dispatchEvent(new CustomEvent("google-review-open-sync-url-detected", { detail: value }));
-      return;
-    }
+  const value = await getZohoVariable(reviewOpenSyncUrl);
+  if (value) {
+    window.dispatchEvent(new CustomEvent("google-review-open-sync-url-detected", { detail: value }));
   }
 }
 
