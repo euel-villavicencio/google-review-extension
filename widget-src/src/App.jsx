@@ -10,7 +10,7 @@ import {
   Search,
   Send,
   Settings,
-  TriangleAlert
+  TriangleAlert,
 } from "lucide-react";
 import "./styles.css";
 
@@ -24,34 +24,44 @@ const defaults = {
   googleReviewLink: "",
   generateModule: "Leads",
   generateRecordId: "",
-  followUpDays: "7"
+  followUpDays: "7",
 };
 
 const productionBackendUrl = "https://greview.koyeb.app/";
-const backendAccessKey =  "googlereviewlinktracker__Backend_Access_Key";
+const backendAccessKey = "googlereviewlinktracker__Backend_Access_Key";
 const reviewOpenSyncUrl = "googlereviewlinktracker__Review_Open_Sync_URL";
 
 const errorMessages = {
   days_must_be_a_positive_number: "Enter a valid number of days.",
-  default_module_api_name_must_be_Leads_or_Contacts: "Choose either Leads or Contacts as the default module.",
-  google_review_link_must_be_a_google_https_url: "Enter a valid Google HTTPS review page URL.",
-  internal_server_error: "Something went wrong on the review tracking server. Please try again.",
-  invalid_credentials: "The server connection key does not match this Zoho organisation. Reinstall the extension or reset this organisation on the server.",
+  default_module_api_name_must_be_Leads_or_Contacts:
+    "Choose either Leads or Contacts as the default module.",
+  google_review_link_must_be_a_google_https_url:
+    "Enter a valid Google HTTPS review page URL.",
+  internal_server_error:
+    "Something went wrong on the review tracking server. Please try again.",
+  invalid_credentials:
+    "The server connection key does not match this Zoho organisation. Reinstall the extension or reset this organisation on the server.",
   invalid_crm_record_id: "Enter a valid Zoho record ID.",
   invalid_json: "The request could not be read. Please try again.",
-  missing_x_api_key: "The server connection key was not found. Reinstall or update the extension setup.",
-  missing_x_crm_org_id: "Zoho organisation ID was not detected. Reopen this widget inside Zoho CRM.",
+  missing_x_api_key:
+    "The server connection key was not found. Reinstall or update the extension setup.",
+  missing_x_crm_org_id:
+    "Zoho organisation ID was not detected. Reopen this widget inside Zoho CRM.",
   module_api_name_must_be_Leads_or_Contacts: "Choose either Leads or Contacts.",
   not_found: "The requested review link was not found.",
-  review_open_sync_url_must_be_a_zoho_https_function_url: "The Zoho review-open sync URL is invalid. Reinstall or update the extension setup.",
+  review_open_sync_url_must_be_a_zoho_https_function_url:
+    "The Zoho review-open sync URL is invalid. Reinstall or update the extension setup.",
   unknown_org_slug: "This business slug is not configured.",
-  url_slug_already_taken: "This business slug is already in use. Try another one.",
-  url_slug_must_use_lowercase_letters_numbers_and_hyphens: "Use only lowercase letters, numbers, and hyphens for the organisation slug."
+  url_slug_already_taken:
+    "This business slug is already in use. Try another one.",
+  url_slug_must_use_lowercase_letters_numbers_and_hyphens:
+    "Use only lowercase letters, numbers, and hyphens for the organisation slug.",
 };
 
 function App() {
-  const dashboardOnly = window.location.pathname.endsWith("/dashboard.html")
-    || new URLSearchParams(window.location.search).get("view") === "dashboard";
+  const dashboardOnly =
+    window.location.pathname.endsWith("/dashboard.html") ||
+    new URLSearchParams(window.location.search).get("view") === "dashboard";
   const [config, setConfig] = useState(loadLocalConfig);
   const [message, setMessage] = useState(null);
   const [busy, setBusy] = useState(null);
@@ -68,13 +78,16 @@ function App() {
   }, [config.backendUrl, config.urlSlug, config.defaultModule]);
 
   useEffect(() => {
-    localStorage.setItem("google-review-settings", JSON.stringify({
-      backendUrl: productionBackendUrl,
-      urlSlug: config.urlSlug,
-      defaultModule: config.defaultModule,
-      googleReviewLink: config.googleReviewLink,
-      followUpDays: config.followUpDays
-    }));
+    localStorage.setItem(
+      "google-review-settings",
+      JSON.stringify({
+        backendUrl: productionBackendUrl,
+        urlSlug: config.urlSlug,
+        defaultModule: config.defaultModule,
+        googleReviewLink: config.googleReviewLink,
+        followUpDays: config.followUpDays,
+      }),
+    );
   }, [config]);
 
   useEffect(() => {
@@ -91,7 +104,7 @@ function App() {
           setConfig((current) => ({
             ...current,
             generateModule: context.moduleApiName,
-            generateRecordId: context.recordId
+            generateRecordId: context.recordId,
           }));
         }
       });
@@ -111,7 +124,11 @@ function App() {
     }
 
     window.addEventListener("google-review-org-detected", handleOrgDetected);
-    return () => window.removeEventListener("google-review-org-detected", handleOrgDetected);
+    return () =>
+      window.removeEventListener(
+        "google-review-org-detected",
+        handleOrgDetected,
+      );
   }, []);
 
   useEffect(() => {
@@ -121,8 +138,15 @@ function App() {
       setConfig((current) => ({ ...current, reviewOpenSyncUrl }));
     }
 
-    window.addEventListener("google-review-open-sync-url-detected", handleOpenSyncUrlDetected);
-    return () => window.removeEventListener("google-review-open-sync-url-detected", handleOpenSyncUrlDetected);
+    window.addEventListener(
+      "google-review-open-sync-url-detected",
+      handleOpenSyncUrlDetected,
+    );
+    return () =>
+      window.removeEventListener(
+        "google-review-open-sync-url-detected",
+        handleOpenSyncUrlDetected,
+      );
   }, []);
 
   useEffect(() => {
@@ -132,22 +156,43 @@ function App() {
       setConfig((current) => ({ ...current, apiKey }));
     }
 
-    window.addEventListener("google-review-api-key-detected", handleAccessKeyDetected);
-    return () => window.removeEventListener("google-review-api-key-detected", handleAccessKeyDetected);
+    window.addEventListener(
+      "google-review-api-key-detected",
+      handleAccessKeyDetected,
+    );
+    return () =>
+      window.removeEventListener(
+        "google-review-api-key-detected",
+        handleAccessKeyDetected,
+      );
   }, []);
 
   useEffect(() => {
-    if (!recordContext || !config.crmOrgId || !config.apiKey || autoGenerateStarted.current) {
+    if (
+      !recordContext ||
+      !config.crmOrgId ||
+      !config.apiKey ||
+      autoGenerateStarted.current
+    ) {
       return;
     }
     autoGenerateStarted.current = true;
-    generateReviewLinkForRecord(recordContext.moduleApiName, recordContext.recordId, {
-      successMessage: "Review link written to this record."
-    });
+    generateReviewLinkForRecord(
+      recordContext.moduleApiName,
+      recordContext.recordId,
+      {
+        successMessage: "Review link written to this record.",
+      },
+    );
   }, [recordContext, config.crmOrgId, config.apiKey]);
 
   useEffect(() => {
-    if (!dashboardOnly || !config.crmOrgId || !config.apiKey || autoDashboardStarted.current) {
+    if (
+      !dashboardOnly ||
+      !config.crmOrgId ||
+      !config.apiKey ||
+      autoDashboardStarted.current
+    ) {
       return;
     }
     autoDashboardStarted.current = true;
@@ -165,7 +210,9 @@ function App() {
 
     try {
       if (!config.reviewOpenSyncUrl?.trim()) {
-        throw new Error("The Zoho review-open sync URL was not found. Run the extension install action after creating the hidden Review Open Sync URL property.");
+        throw new Error(
+          "The Zoho review-open sync URL was not found. Run the extension install action after creating the hidden Review Open Sync URL property.",
+        );
       }
       const body = await apiRequest(config, "/org_settings", {
         method: "PUT",
@@ -173,11 +220,14 @@ function App() {
           url_slug: config.urlSlug.trim().toLowerCase(),
           google_review_link: config.googleReviewLink.trim(),
           review_open_sync_url: config.reviewOpenSyncUrl.trim(),
-          default_module_api_name: config.defaultModule
-        }
+          default_module_api_name: config.defaultModule,
+        },
       });
       updateConfig("urlSlug", body.url_slug);
-      setMessage({ type: "success", text: "Settings saved and ready for link generation." });
+      setMessage({
+        type: "success",
+        text: "Settings saved and ready for link generation.",
+      });
     } catch (error) {
       setMessage({ type: "error", text: error.message });
     } finally {
@@ -195,7 +245,7 @@ function App() {
         ...current,
         urlSlug: body.url_slug || current.urlSlug,
         googleReviewLink: body.google_review_link || current.googleReviewLink,
-        defaultModule: body.default_module_api_name || current.defaultModule
+        defaultModule: body.default_module_api_name || current.defaultModule,
       }));
       setMessage({ type: "success", text: "Current backend settings loaded." });
     } catch (error) {
@@ -205,7 +255,11 @@ function App() {
     }
   }
 
-  async function generateReviewLinkForRecord(moduleApiName, recordId, options = {}) {
+  async function generateReviewLinkForRecord(
+    moduleApiName,
+    recordId,
+    options = {},
+  ) {
     setBusy("generate");
     setGeneratedLink("");
     setMessage(null);
@@ -217,12 +271,15 @@ function App() {
         body: {
           module_api_name: moduleApiName,
           crm_record_id: recordId,
-          crm_record_name: recordName
-        }
+          crm_record_name: recordName,
+        },
       });
       await updateZohoReviewLink(moduleApiName, recordId, body.review_link);
       setGeneratedLink(body.review_link);
-      setMessage({ type: "success", text: options.successMessage || "Review link written to Zoho." });
+      setMessage({
+        type: "success",
+        text: options.successMessage || "Review link written to Zoho.",
+      });
     } catch (error) {
       setMessage({ type: "error", text: error.message });
     } finally {
@@ -232,7 +289,10 @@ function App() {
 
   async function generateReviewLink(event) {
     event.preventDefault();
-    await generateReviewLinkForRecord(config.generateModule, config.generateRecordId.trim());
+    await generateReviewLinkForRecord(
+      config.generateModule,
+      config.generateRecordId.trim(),
+    );
   }
 
   async function loadFollowUps() {
@@ -242,9 +302,15 @@ function App() {
 
     try {
       const days = Math.max(0, Number(config.followUpDays || 0));
-      const body = await apiRequest(config, `/review_links/unopened?days=${encodeURIComponent(days)}`);
+      const body = await apiRequest(
+        config,
+        `/review_links/unopened?days=${encodeURIComponent(days)}`,
+      );
       setFollowUps(body);
-      setMessage({ type: "success", text: `${body.count} unopened link${body.count === 1 ? "" : "s"} found.` });
+      setMessage({
+        type: "success",
+        text: `${body.count} unopened link${body.count === 1 ? "" : "s"} found.`,
+      });
     } catch (error) {
       setMessage({ type: "error", text: error.message });
     } finally {
@@ -258,12 +324,20 @@ function App() {
 
     try {
       const days = Math.max(0, Number(config.followUpDays || 0));
-      const currentFollowUps = followUps || await apiRequest(config, `/review_links/unopened?days=${encodeURIComponent(days)}`);
+      const currentFollowUps =
+        followUps ||
+        (await apiRequest(
+          config,
+          `/review_links/unopened?days=${encodeURIComponent(days)}`,
+        ));
       const records = currentFollowUps.records || [];
       setFollowUps(currentFollowUps);
 
       if (records.length === 0) {
-        setMessage({ type: "success", text: "No unopened review links need follow-up tasks." });
+        setMessage({
+          type: "success",
+          text: "No unopened review links need follow-up tasks.",
+        });
         return;
       }
 
@@ -274,26 +348,31 @@ function App() {
           results.push({
             module_api_name: record.module_api_name,
             crm_record_id: record.crm_record_id,
-            status: "created"
+            status: "created",
           });
         } catch (error) {
           results.push({
             module_api_name: record.module_api_name,
             crm_record_id: record.crm_record_id,
             status: "failed",
-            error: error.message
+            error: error.message,
           });
         }
       }
 
       await apiRequest(config, "/review_links/followups/mark_created", {
         method: "POST",
-        body: { records: results }
+        body: { records: results },
       });
 
-      const createdCount = results.filter((record) => record.status === "created").length;
+      const createdCount = results.filter(
+        (record) => record.status === "created",
+      ).length;
       const failedCount = results.length - createdCount;
-      const refreshedFollowUps = await apiRequest(config, `/review_links/unopened?days=${encodeURIComponent(days)}`);
+      const refreshedFollowUps = await apiRequest(
+        config,
+        `/review_links/unopened?days=${encodeURIComponent(days)}`,
+      );
       const refreshedDashboard = await apiRequest(config, "/dashboard/stats");
       setFollowUps(refreshedFollowUps);
       setDashboard(refreshedDashboard);
@@ -301,7 +380,7 @@ function App() {
         type: failedCount ? "error" : "success",
         text: failedCount
           ? `${createdCount} follow-up task${createdCount === 1 ? "" : "s"} created, ${failedCount} failed.`
-          : `${createdCount} follow-up task${createdCount === 1 ? "" : "s"} created.`
+          : `${createdCount} follow-up task${createdCount === 1 ? "" : "s"} created.`,
       });
     } catch (error) {
       setMessage({ type: "error", text: error.message });
@@ -331,10 +410,21 @@ function App() {
         <header className="app-header dashboard-page-header">
           <div>
             <h1>Google Review Dashboard</h1>
-            <p className="subtitle">Review-link activity and engagement for this Zoho organisation.</p>
+            <p className="subtitle">
+              Review-link activity and engagement for this Zoho organisation.
+            </p>
           </div>
-          <button type="button" className="secondary" onClick={loadDashboard} disabled={busy === "dashboard"}>
-            {busy === "dashboard" ? <Loader2 className="spin" size={16} /> : <RefreshCw size={16} />}
+          <button
+            type="button"
+            className="secondary"
+            onClick={loadDashboard}
+            disabled={busy === "dashboard"}
+          >
+            {busy === "dashboard" ? (
+              <Loader2 className="spin" size={16} />
+            ) : (
+              <RefreshCw size={16} />
+            )}
             Refresh Dashboard
           </button>
         </header>
@@ -346,18 +436,46 @@ function App() {
         </section>
 
         <section className="panel dashboard-page-panel">
-          <PanelTitle icon={Search} title="Follow-ups" caption="Find generated links that have not been opened and create Zoho Tasks." />
+          <PanelTitle
+            icon={Search}
+            title="Follow-ups"
+            caption="Find generated links that have not been opened and create Zoho Tasks."
+          />
 
           <div className="follow-row">
             <Field label="Days Since Link Generated">
-              <input value={config.followUpDays} onChange={(event) => updateConfig("followUpDays", event.target.value)} type="number" min="0" />
+              <input
+                value={config.followUpDays}
+                onChange={(event) =>
+                  updateConfig("followUpDays", event.target.value)
+                }
+                type="number"
+                min="0"
+              />
             </Field>
-            <button type="button" onClick={loadFollowUps} disabled={busy === "followups"}>
-              {busy === "followups" ? <Loader2 className="spin" size={16} /> : <Search size={16} />}
+            <button
+              type="button"
+              onClick={loadFollowUps}
+              disabled={busy === "followups"}
+            >
+              {busy === "followups" ? (
+                <Loader2 className="spin" size={16} />
+              ) : (
+                <Search size={16} />
+              )}
               Load
             </button>
-            <button type="button" className="secondary" onClick={createFollowUpTasks} disabled={busy === "createFollowups"}>
-              {busy === "createFollowups" ? <Loader2 className="spin" size={16} /> : <CheckCircle2 size={16} />}
+            <button
+              type="button"
+              className="secondary"
+              onClick={createFollowUpTasks}
+              disabled={busy === "createFollowups"}
+            >
+              {busy === "createFollowups" ? (
+                <Loader2 className="spin" size={16} />
+              ) : (
+                <CheckCircle2 size={16} />
+              )}
               Create Tasks
             </button>
           </div>
@@ -373,7 +491,9 @@ function App() {
       <header className="app-header">
         <div>
           <h1>Google Review Link</h1>
-          <p className="subtitle">Configure review tracking for Zoho CRM Leads and Contacts.</p>
+          <p className="subtitle">
+            Configure review tracking for Zoho CRM Leads and Contacts.
+          </p>
         </div>
       </header>
 
@@ -381,7 +501,11 @@ function App() {
 
       <section className="layout-grid">
         <form className="panel settings-panel" onSubmit={saveSettings}>
-          <PanelTitle icon={Settings} title="Review Settings" caption="Set the Google review page and business link slug." />
+          <PanelTitle
+            icon={Settings}
+            title="Review Settings"
+            caption="Set the Google review page and business link slug."
+          />
 
           <Field label="Organisation Slug" span>
             <input
@@ -395,7 +519,9 @@ function App() {
           <Field label="Google Review Page URL" span>
             <input
               value={config.googleReviewLink}
-              onChange={(event) => updateConfig("googleReviewLink", event.target.value)}
+              onChange={(event) =>
+                updateConfig("googleReviewLink", event.target.value)
+              }
               placeholder="Paste the business Google review page URL"
               type="url"
               required
@@ -404,28 +530,61 @@ function App() {
 
           <div className="button-row">
             <button type="submit" disabled={busy === "save"}>
-              {busy === "save" ? <Loader2 className="spin" size={16} /> : <CheckCircle2 size={16} />}
+              {busy === "save" ? (
+                <Loader2 className="spin" size={16} />
+              ) : (
+                <CheckCircle2 size={16} />
+              )}
               Save Settings
             </button>
-            <button type="button" className="secondary" onClick={loadSettings} disabled={busy === "load"}>
-              {busy === "load" ? <Loader2 className="spin" size={16} /> : <RefreshCw size={16} />}
+            <button
+              type="button"
+              className="secondary"
+              onClick={loadSettings}
+              disabled={busy === "load"}
+            >
+              {busy === "load" ? (
+                <Loader2 className="spin" size={16} />
+              ) : (
+                <RefreshCw size={16} />
+              )}
               Load Current
             </button>
           </div>
         </form>
 
         <section className="panel">
-          <PanelTitle icon={ExternalLink} title="Review Link Preview" caption="Each Lead or Contact gets a unique tracking link." />
+          <PanelTitle
+            icon={ExternalLink}
+            title="Review Link Preview"
+            caption="Each Lead or Contact gets a unique tracking link."
+          />
           <code className="preview-code">{linkPreview}</code>
-          <p className="fine-print">When opened, the visit is recorded before redirecting to the Google review page.</p>
+          <p className="fine-print">
+            When opened, the visit is recorded before redirecting to the Google
+            review page.
+          </p>
         </section>
       </section>
 
       <section className="panel dashboard-panel">
         <div className="dashboard-header">
-          <PanelTitle icon={BarChart3} title="Google Review Dashboard" caption="Unique review link and basic request statistics." />
-          <button type="button" className="secondary" onClick={loadDashboard} disabled={busy === "dashboard"}>
-            {busy === "dashboard" ? <Loader2 className="spin" size={16} /> : <RefreshCw size={16} />}
+          <PanelTitle
+            icon={BarChart3}
+            title="Google Review Dashboard"
+            caption="Unique review link and basic request statistics."
+          />
+          <button
+            type="button"
+            className="secondary"
+            onClick={loadDashboard}
+            disabled={busy === "dashboard"}
+          >
+            {busy === "dashboard" ? (
+              <Loader2 className="spin" size={16} />
+            ) : (
+              <RefreshCw size={16} />
+            )}
             Refresh
           </button>
         </div>
@@ -437,13 +596,19 @@ function App() {
           <PanelTitle
             icon={Send}
             title={recordContext ? "Current Record" : "Generate Review Link"}
-            caption={recordContext ? "The review link is generated automatically for this record." : "Use this only when testing or fixing a specific CRM record."}
+            caption={
+              recordContext
+                ? "The review link is generated automatically for this record."
+                : "Use this only when testing or fixing a specific CRM record."
+            }
           />
 
           {recordContext && (
             <div className="context-box">
               <span>Current record</span>
-              <strong>{recordContext.moduleApiName} / {recordContext.recordId}</strong>
+              <strong>
+                {recordContext.moduleApiName} / {recordContext.recordId}
+              </strong>
             </div>
           )}
 
@@ -451,7 +616,9 @@ function App() {
             <Field label="Module">
               <select
                 value={config.generateModule}
-                onChange={(event) => updateConfig("generateModule", event.target.value)}
+                onChange={(event) =>
+                  updateConfig("generateModule", event.target.value)
+                }
                 disabled={Boolean(recordContext)}
               >
                 <option value="Leads">Leads</option>
@@ -461,7 +628,9 @@ function App() {
             <Field label="Zoho Record ID">
               <input
                 value={config.generateRecordId}
-                onChange={(event) => updateConfig("generateRecordId", event.target.value)}
+                onChange={(event) =>
+                  updateConfig("generateRecordId", event.target.value)
+                }
                 placeholder="Enter Zoho record ID"
                 readOnly={Boolean(recordContext)}
                 required
@@ -470,7 +639,11 @@ function App() {
           </div>
 
           <button type="submit" disabled={busy === "generate"}>
-            {busy === "generate" ? <Loader2 className="spin" size={16} /> : <Send size={16} />}
+            {busy === "generate" ? (
+              <Loader2 className="spin" size={16} />
+            ) : (
+              <Send size={16} />
+            )}
             {recordContext ? "Update Link Again" : "Generate and Save"}
           </button>
 
@@ -484,18 +657,46 @@ function App() {
         </form>
 
         <section className="panel">
-          <PanelTitle icon={Search} title="Follow-ups" caption="Find generated links that have not been opened." />
+          <PanelTitle
+            icon={Search}
+            title="Follow-ups"
+            caption="Find generated links that have not been opened."
+          />
 
           <div className="follow-row">
             <Field label="Days Since Link Generated">
-              <input value={config.followUpDays} onChange={(event) => updateConfig("followUpDays", event.target.value)} type="number" min="0" />
+              <input
+                value={config.followUpDays}
+                onChange={(event) =>
+                  updateConfig("followUpDays", event.target.value)
+                }
+                type="number"
+                min="0"
+              />
             </Field>
-            <button type="button" onClick={loadFollowUps} disabled={busy === "followups"}>
-              {busy === "followups" ? <Loader2 className="spin" size={16} /> : <Search size={16} />}
+            <button
+              type="button"
+              onClick={loadFollowUps}
+              disabled={busy === "followups"}
+            >
+              {busy === "followups" ? (
+                <Loader2 className="spin" size={16} />
+              ) : (
+                <Search size={16} />
+              )}
               Load
             </button>
-            <button type="button" className="secondary" onClick={createFollowUpTasks} disabled={busy === "createFollowups"}>
-              {busy === "createFollowups" ? <Loader2 className="spin" size={16} /> : <CheckCircle2 size={16} />}
+            <button
+              type="button"
+              className="secondary"
+              onClick={createFollowUpTasks}
+              disabled={busy === "createFollowups"}
+            >
+              {busy === "createFollowups" ? (
+                <Loader2 className="spin" size={16} />
+              ) : (
+                <CheckCircle2 size={16} />
+              )}
               Create Tasks
             </button>
           </div>
@@ -509,28 +710,37 @@ function App() {
 
 async function updateZohoReviewLink(moduleApiName, recordId, reviewLink) {
   if (!window.ZOHO?.CRM?.API?.updateRecord) {
-    throw new Error("Zoho record update API is unavailable. Open this widget from inside a Lead or Contact record.");
+    throw new Error(
+      "Zoho record update API is unavailable. Open this widget from inside a Lead or Contact record.",
+    );
   }
 
   const response = await window.ZOHO.CRM.API.updateRecord({
     Entity: moduleApiName,
     APIData: {
       id: String(recordId),
-      googlereview__Google_Review_Link: reviewLink
+      googlereview__Google_Review_Link: reviewLink,
     },
-    Trigger: []
+    Trigger: [],
   });
 
-  const result = Array.isArray(response?.data) ? response.data[0] : response?.data;
+  const result = Array.isArray(response?.data)
+    ? response.data[0]
+    : response?.data;
   if (result?.status && String(result.status).toLowerCase() !== "success") {
-    const detail = result?.details?.api_name || result?.message || "unknown Zoho error";
-    throw new Error(`Zoho could not update the Google Review Link field: ${detail}`);
+    const detail =
+      result?.details?.api_name || result?.message || "unknown Zoho error";
+    throw new Error(
+      `Zoho could not update the Google Review Link field: ${detail}`,
+    );
   }
 }
 
 async function createZohoFollowUpTask(record) {
   if (!window.ZOHO?.CRM?.API?.insertRecord) {
-    throw new Error("Zoho task creation API is unavailable. Open this widget from inside Zoho CRM.");
+    throw new Error(
+      "Zoho task creation API is unavailable. Open this widget from inside Zoho CRM.",
+    );
   }
 
   const response = await window.ZOHO.CRM.API.insertRecord({
@@ -541,26 +751,32 @@ async function createZohoFollowUpTask(record) {
       Priority: "Normal",
       Due_Date: new Date().toISOString().slice(0, 10),
       What_Id: { id: String(record.crm_record_id) },
-      $se_module: record.module_api_name
+      $se_module: record.module_api_name,
     },
-    Trigger: []
+    Trigger: [],
   });
 
-  const result = Array.isArray(response?.data) ? response.data[0] : response?.data;
+  const result = Array.isArray(response?.data)
+    ? response.data[0]
+    : response?.data;
   if (result?.status && String(result.status).toLowerCase() !== "success") {
-    const detail = result?.details?.api_name || result?.message || "unknown Zoho error";
+    const detail =
+      result?.details?.api_name || result?.message || "unknown Zoho error";
     throw new Error(`Zoho could not create the follow-up task: ${detail}`);
   }
 }
 
 async function getZohoRecordName(moduleApiName, recordId) {
-  if (!moduleApiName || !recordId || !window.ZOHO?.CRM?.API?.getRecord) return "";
+  if (!moduleApiName || !recordId || !window.ZOHO?.CRM?.API?.getRecord)
+    return "";
   try {
     const response = await window.ZOHO.CRM.API.getRecord({
       Entity: moduleApiName,
-      RecordID: String(recordId)
+      RecordID: String(recordId),
     });
-    const record = Array.isArray(response?.data) ? response.data[0] : response?.data;
+    const record = Array.isArray(response?.data)
+      ? response.data[0]
+      : response?.data;
     return buildZohoRecordName(record);
   } catch {
     return "";
@@ -569,7 +785,8 @@ async function getZohoRecordName(moduleApiName, recordId) {
 
 function buildZohoRecordName(record) {
   if (!record) return "";
-  const directName = record.Full_Name || record.Name || record.Account_Name?.name || "";
+  const directName =
+    record.Full_Name || record.Name || record.Account_Name?.name || "";
   if (directName) return String(directName).trim();
   return [record.First_Name, record.Last_Name].filter(Boolean).join(" ").trim();
 }
@@ -579,19 +796,31 @@ function DashboardStats({ data, preview }) {
   const stats = data?.totals || {};
   const reviewLinkFormat = data?.review_link_format || preview;
   const recentLinks = data?.recent_links || [];
-  const filteredRecentLinks = activityFilter === "All"
-    ? recentLinks
-    : recentLinks.filter((record) => record.module_api_name === activityFilter);
-  const moduleOptions = ["All", ...Array.from(new Set([
-    ...(data?.by_module || []).map((row) => row.module_api_name),
-    ...recentLinks.map((record) => record.module_api_name)
-  ]))].filter(Boolean);
+  const filteredRecentLinks =
+    activityFilter === "All"
+      ? recentLinks
+      : recentLinks.filter(
+          (record) => record.module_api_name === activityFilter,
+        );
+  const moduleOptions = ["All", "Leads", "Contacts"];
   const metrics = [
-    { label: "Generated links", value: stats.generated_links ?? 0, tone: "blue" },
+    {
+      label: "Generated links",
+      value: stats.generated_links ?? 0,
+      tone: "blue",
+    },
     { label: "Opened links", value: stats.opened_links ?? 0, tone: "green" },
-    { label: "Unopened links", value: stats.unopened_links ?? 0, tone: "amber" },
+    {
+      label: "Unopened links",
+      value: stats.unopened_links ?? 0,
+      tone: "amber",
+    },
     { label: "Total opens", value: stats.total_opens ?? 0, tone: "purple" },
-    { label: "Follow-up tasks", value: stats.follow_up_tasks ?? 0, tone: "sky" }
+    {
+      label: "Follow-up tasks",
+      value: stats.follow_up_tasks ?? 0,
+      tone: "sky",
+    },
   ];
 
   return (
@@ -609,7 +838,11 @@ function DashboardStats({ data, preview }) {
 
       <div className="metric-grid">
         {metrics.map((metric) => (
-          <div className="metric-card" key={metric.label} data-tone={metric.tone}>
+          <div
+            className="metric-card"
+            key={metric.label}
+            data-tone={metric.tone}
+          >
             <span>{metric.label}</span>
             <strong>{metric.value}</strong>
           </div>
@@ -645,7 +878,9 @@ function DashboardStats({ data, preview }) {
             </article>
           ))}
           {data && (!data.by_module || data.by_module.length === 0) && (
-            <p className="empty-state">No review links have been generated yet.</p>
+            <p className="empty-state">
+              No review links have been generated yet.
+            </p>
           )}
         </div>
       </section>
@@ -656,7 +891,10 @@ function DashboardStats({ data, preview }) {
             <span className="eyebrow">Latest activity</span>
             <h2>Recent review links</h2>
           </div>
-          <div className="activity-filter" aria-label="Filter latest activity by module">
+          <div
+            className="activity-filter"
+            aria-label="Filter latest activity by module"
+          >
             {moduleOptions.map((moduleName) => (
               <button
                 className={activityFilter === moduleName ? "active" : ""}
@@ -680,13 +918,20 @@ function RecentLinks({ records }) {
 
   useEffect(() => {
     let cancelled = false;
-    const missing = (records || []).filter((record) => !record.crm_record_name && !recordNames[recordKey(record)]);
+    const missing = (records || []).filter(
+      (record) => !record.crm_record_name && !recordNames[recordKey(record)],
+    );
     if (missing.length === 0) return;
 
-    Promise.all(missing.map(async (record) => {
-      const name = await getZohoRecordName(record.module_api_name, record.crm_record_id);
-      return [recordKey(record), name];
-    })).then((entries) => {
+    Promise.all(
+      missing.map(async (record) => {
+        const name = await getZohoRecordName(
+          record.module_api_name,
+          record.crm_record_id,
+        );
+        return [recordKey(record), name];
+      }),
+    ).then((entries) => {
       if (cancelled) return;
       const nextNames = Object.fromEntries(entries.filter(([, name]) => name));
       if (Object.keys(nextNames).length > 0) {
@@ -700,7 +945,11 @@ function RecentLinks({ records }) {
   }, [records]);
 
   if (!records) {
-    return <p className="empty-state">Refresh the dashboard to see recent review links.</p>;
+    return (
+      <p className="empty-state">
+        Refresh the dashboard to see recent review links.
+      </p>
+    );
   }
   if (records.length === 0) {
     return <p className="empty-state">No recent review links yet.</p>;
@@ -711,9 +960,19 @@ function RecentLinks({ records }) {
         <article className="recent-item" key={recordKey(record)}>
           <div className="recent-record">
             <span>{record.module_api_name}</span>
-            <strong>{record.crm_record_name || recordNames[recordKey(record)] || record.crm_record_id}</strong>
-            {(record.crm_record_name || recordNames[recordKey(record)]) && <small className="record-id">{record.crm_record_id}</small>}
-            {record.last_generated_at && <small>Generated {formatDateTime(record.last_generated_at)}</small>}
+            <strong>
+              {record.crm_record_name ||
+                recordNames[recordKey(record)] ||
+                record.crm_record_id}
+            </strong>
+            {(record.crm_record_name || recordNames[recordKey(record)]) && (
+              <small className="record-id">{record.crm_record_id}</small>
+            )}
+            {record.last_generated_at && (
+              <small>
+                Generated {formatDateTime(record.last_generated_at)}
+              </small>
+            )}
           </div>
           <div className="recent-open-count">
             <strong>{record.open_count || 0}</strong>
@@ -741,7 +1000,7 @@ function formatDateTime(value) {
     month: "short",
     day: "numeric",
     hour: "numeric",
-    minute: "2-digit"
+    minute: "2-digit",
   });
 }
 
@@ -788,7 +1047,11 @@ function ResultBox({ label, value, action }) {
 
 function FollowUpList({ data }) {
   if (!data) {
-    return <p className="empty-state">Load follow-ups to see generated links that have not been opened.</p>;
+    return (
+      <p className="empty-state">
+        Load follow-ups to see generated links that have not been opened.
+      </p>
+    );
   }
   if (data.records.length === 0) {
     return <p className="empty-state">No unopened review links found.</p>;
@@ -796,10 +1059,18 @@ function FollowUpList({ data }) {
   return (
     <div className="follow-list">
       {data.records.map((record) => (
-        <article className="follow-item" key={`${record.module_api_name}:${record.crm_record_id}`}>
+        <article
+          className="follow-item"
+          key={`${record.module_api_name}:${record.crm_record_id}`}
+        >
           <div>
-            <strong>{record.module_api_name} / {record.crm_record_id}</strong>
-            <span>Generated {formatDate(record.last_generated_at || record.created_at)}</span>
+            <strong>
+              {record.module_api_name} / {record.crm_record_id}
+            </strong>
+            <span>
+              Generated{" "}
+              {formatDate(record.last_generated_at || record.created_at)}
+            </span>
             <code>{record.review_link}</code>
           </div>
           <CopyButton value={record.review_link} />
@@ -827,8 +1098,14 @@ function CopyButton({ value }) {
 async function apiRequest(config, path, options = {}) {
   const backendUrl = normalizeBaseUrl(config.backendUrl);
   if (!backendUrl) throw new Error("Backend URL is required.");
-  if (!config.crmOrgId?.trim()) throw new Error("Zoho organisation ID was not detected from Zoho. Reopen this widget inside Zoho CRM.");
-  if (!config.apiKey?.trim()) throw new Error("Server connection key was not found. Check the extension setup.");
+  if (!config.crmOrgId?.trim())
+    throw new Error(
+      "Zoho organisation ID was not detected from Zoho. Reopen this widget inside Zoho CRM.",
+    );
+  if (!config.apiKey?.trim())
+    throw new Error(
+      "Server connection key was not found. Check the extension setup.",
+    );
 
   const response = await fetch(`${backendUrl}${path}`, {
     method: options.method || "GET",
@@ -836,9 +1113,9 @@ async function apiRequest(config, path, options = {}) {
       "content-type": "application/json",
       "x-crm-org-id": config.crmOrgId.trim(),
       "x-api-key": config.apiKey.trim(),
-      "bypass-tunnel-reminder": "true"
+      "bypass-tunnel-reminder": "true",
     },
-    body: options.body ? JSON.stringify(options.body) : undefined
+    body: options.body ? JSON.stringify(options.body) : undefined,
   });
   const body = await response.json().catch(() => ({}));
   if (!response.ok) {
@@ -858,12 +1135,16 @@ function formatErrorMessage(errorCode, status) {
 }
 
 function normalizeBaseUrl(value) {
-  return String(value || "").trim().replace(/\/$/, "");
+  return String(value || "")
+    .trim()
+    .replace(/\/$/, "");
 }
 
 function normalizeZohoContext(data) {
   const moduleApiName = data?.Entity;
-  const rawEntityId = Array.isArray(data?.EntityId) ? data.EntityId[0] : data?.EntityId;
+  const rawEntityId = Array.isArray(data?.EntityId)
+    ? data.EntityId[0]
+    : data?.EntityId;
   const recordId = String(rawEntityId || "").trim();
 
   if (!isSupportedModule(moduleApiName) || !recordId) {
@@ -879,7 +1160,9 @@ async function hydrateZohoOrgId() {
     const crmOrgId = extractZohoOrgId(orgInfo);
     if (!crmOrgId) return;
 
-    window.dispatchEvent(new CustomEvent("google-review-org-detected", { detail: crmOrgId }));
+    window.dispatchEvent(
+      new CustomEvent("google-review-org-detected", { detail: crmOrgId }),
+    );
   } catch (error) {
     console.warn("Unable to detect Zoho org ID", error);
   }
@@ -888,20 +1171,27 @@ async function hydrateZohoOrgId() {
 async function hydrateBackendAccessKey() {
   const value = await getZohoVariable(backendAccessKey);
   if (value) {
-    window.dispatchEvent(new CustomEvent("google-review-api-key-detected", { detail: value }));
+    window.dispatchEvent(
+      new CustomEvent("google-review-api-key-detected", { detail: value }),
+    );
   }
 }
 
 async function hydrateReviewOpenSyncUrl() {
   const value = await getZohoVariable(reviewOpenSyncUrl);
   if (value) {
-    window.dispatchEvent(new CustomEvent("google-review-open-sync-url-detected", { detail: value }));
+    window.dispatchEvent(
+      new CustomEvent("google-review-open-sync-url-detected", {
+        detail: value,
+      }),
+    );
   }
 }
 
 async function getZohoVariable(variableName) {
   try {
-    const response = await window.ZOHO?.CRM?.API?.getOrgVariable?.(variableName);
+    const response =
+      await window.ZOHO?.CRM?.API?.getOrgVariable?.(variableName);
     return extractZohoVariableValue(response);
   } catch {
     return "";
@@ -915,7 +1205,7 @@ function extractZohoVariableValue(data) {
     data?.value,
     data?.Value,
     data?.data?.[0]?.value,
-    data?.variables?.[0]?.value
+    data?.variables?.[0]?.value,
   ];
   const value = candidates.find((candidate) => String(candidate || "").trim());
   return String(value || "").trim();
@@ -934,7 +1224,7 @@ function extractZohoOrgId(data) {
     data?.zgid,
     data?.primary_zuid,
     data?.org_id,
-    data?.OrgId
+    data?.OrgId,
   ];
   const value = candidates.find((candidate) => String(candidate || "").trim());
   return String(value || "").trim();
@@ -946,14 +1236,16 @@ function isSupportedModule(value) {
 
 function loadLocalConfig() {
   try {
-    const saved = JSON.parse(localStorage.getItem("google-review-settings") || "{}");
+    const saved = JSON.parse(
+      localStorage.getItem("google-review-settings") || "{}",
+    );
     delete saved.crmOrgId;
     delete saved.apiKey;
     delete saved.reviewOpenSyncUrl;
     return enforceProductionBackend({
       ...defaults,
       ...saved,
-      crmOrgId: ""
+      crmOrgId: "",
     });
   } catch {
     return defaults;
