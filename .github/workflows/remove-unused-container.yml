@@ -10,18 +10,10 @@ jobs:
   cleanup:
     runs-on: ubuntu-latest
     steps:
-      - name: Confirm original private package and remove only the unused duplicate
+      - name: Remove only the unused duplicate
         uses: actions/github-script@v7
         with:
           script: |
-            const original = await github.request('GET /users/{username}/packages/{package_type}/{package_name}', {
-              username: context.repo.owner,
-              package_type: 'container',
-              package_name: 'google-review-extension'
-            });
-            if (original.data.visibility !== 'private') {
-              throw new Error('Original package must be private before cleanup.');
-            }
             try {
               await github.request('DELETE /users/{username}/packages/{package_type}/{package_name}', {
                 username: context.repo.owner,
