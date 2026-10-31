@@ -40,15 +40,6 @@ jobs:
             type=sha,format=long,prefix=
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
             type=raw,value=staging,enable=${{ github.ref == 'refs/heads/container-publishing' }}
-      - name: Build and publish backend
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: backend-python/Dockerfile
-          platforms: linux/amd64
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
       - name: Verify package is private
         uses: actions/github-script@v7
         with:
@@ -62,3 +53,12 @@ jobs:
             if (pkg.visibility !== 'private') {
               core.setFailed('Container package must be private. Check its GitHub package settings.');
             }
+      - name: Build and publish backend
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: backend-python/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

@@ -13,9 +13,11 @@ until the existing Koyeb Git deployment has been migrated, since main currently
 triggers that service automatically.
 
 GitHub Actions uses its built-in GITHUB_TOKEN with contents:read and packages:write;
-no personal access token is required for publishing. New GHCR packages default to
-private. After the first successful run, check the package settings and confirm
-that this package is Private before relying on it for private source distribution.
+no personal access token is required for publishing. The current package was
+reported PUBLIC by GitHub. The workflow now checks package visibility before
+publishing and refuses to publish unless it is private. Resolve privacy in the
+owner package settings or use a private-capable replacement registry before
+using this workflow for private source distribution.
 
 Do not make the repository private until the existing public-repository Koyeb
 integration has been replaced or authenticated; doing so may break future builds.
