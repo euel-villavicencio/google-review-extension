@@ -1,14 +1,14 @@
 // Arguments:
 // contact_id: map this to the current Contact record ID in the button configuration.
 
-backend_url = "https://your-heroku-app.herokuapp.com";
+backend_url = "https://greview.koyeb.app";
 contact_id = contact.get("id");
 
 org_params = Map();
 org_response = zoho.crm.invokeConnector("crm.getorg", org_params);
 org_data = org_response.get("response").get("org").get(0);
 crm_org_id = ifnull(org_data.get("zgid"), ifnull(org_data.get("id"), org_data.get("primary_zuid")));
-api_key = zoho.crm.getOrgVariable("googlereview__Backend_Access_Key");
+api_key = zoho.crm.getOrgVariable("googlereviewlink__Backend_Access_Key");
 
 if(crm_org_id == null || crm_org_id == "")
 {
@@ -53,8 +53,8 @@ info response;
 if(response.get("review_link") != null)
 {
 	update_fields = Map();
-	update_fields.put("googlereview__Google_Review_Link", response.get("review_link"));
-	current_status = ifnull(current_record.get("googlereview__Review_Page_Open_Status"), "");
+	update_fields.put("googlereviewlink__Google_Review_Link", response.get("review_link"));
+	current_status = ifnull(current_record.get("googlereviewlink__Review_Page_Open_Status"), "");
 	response_fields = response.get("fields");
 	if(response_fields != null)
 	{
@@ -62,11 +62,11 @@ if(response.get("review_link") != null)
 		open_count = response_fields.get("Review_Page_Open_Count");
 		if(current_status != "Review Left" && open_status != null && open_status != "")
 		{
-			update_fields.put("googlereview__Review_Page_Open_Status", open_status);
+			update_fields.put("googlereviewlink__Review_Page_Open_Status", open_status);
 		}
 		if(open_count != null)
 		{
-			update_fields.put("googlereview__Review_Page_Open_Count", open_count);
+			update_fields.put("googlereviewlink__Review_Page_Open_Count", open_count);
 		}
 	}
 	update_response = zoho.crm.updateRecord("Contacts", contact_id.toLong(), update_fields);

@@ -88,8 +88,8 @@ create_review_followup_tasks.deluge
 
 Recommended schedule: once per day. It creates Zoho Tasks for generated links that have not been opened, then marks those records in the backend so duplicate Tasks are not created.
 
-The backend URL is set to the live Heroku app in the templates:
+The backend URL is set to the Koyeb service in the templates:
 
 ```text
-https://your-heroku-app.herokuapp.com
+https://greview.koyeb.app
 ```

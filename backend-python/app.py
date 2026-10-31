@@ -360,7 +360,7 @@ def create_app():
     logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
     app = Flask(__name__)
     CORS(app, resources={r"/*": {"origins": "*"}})
-    app.config["PUBLIC_BASE_URL"] = os.getenv("PUBLIC_BASE_URL", "").rstrip("/")
+    app.config["PUBLIC_BASE_URL"] = os.getenv("PUBLIC_BASE_URL", "https://greview.koyeb.app").rstrip("/")
     app.store = Store(os.getenv("DATABASE_URL"))
 
     @app.before_request
@@ -655,7 +655,7 @@ def public_base_url():
 
 
 def current_app_base_url():
-    return os.getenv("PUBLIC_BASE_URL", "").rstrip("/")
+    return os.getenv("PUBLIC_BASE_URL", "https://greview.koyeb.app").rstrip("/")
 
 
 def build_review_link(base_url, slug, module_api_name, record_id):

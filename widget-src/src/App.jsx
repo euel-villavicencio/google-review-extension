@@ -15,7 +15,7 @@ import {
 import "./styles.css";
 
 const defaults = {
-  backendUrl: "https://greview.koyeb.app/",
+  backendUrl: "https://greview.koyeb.app",
   crmOrgId: "",
   apiKey: "",
   reviewOpenSyncUrl: "",
@@ -27,9 +27,9 @@ const defaults = {
   followUpDays: "7",
 };
 
-const productionBackendUrl = "https://greview.koyeb.app/";
-const backendAccessKey = "googlereviewlinktracker__Backend_Access_Key";
-const reviewOpenSyncUrl = "googlereviewlinktracker__Review_Open_Sync_URL";
+const productionBackendUrl = "https://greview.koyeb.app";
+const backendAccessKey = "googlereviewlink__Backend_Access_Key";
+const reviewOpenSyncUrl = "googlereviewlink__Review_Open_Sync_URL";
 
 const errorMessages = {
   days_must_be_a_positive_number: "Enter a valid number of days.",
@@ -719,7 +719,7 @@ async function updateZohoReviewLink(moduleApiName, recordId, reviewLink) {
     Entity: moduleApiName,
     APIData: {
       id: String(recordId),
-      googlereview__Google_Review_Link: reviewLink,
+      googlereviewlink__Google_Review_Link: reviewLink,
     },
     Trigger: [],
   });

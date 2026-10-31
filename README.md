@@ -33,7 +33,7 @@ Required environment:
 
 ```text
 PORT=3000
-PUBLIC_BASE_URL=https://your-heroku-app.herokuapp.com
+PUBLIC_BASE_URL=https://greview.koyeb.app
 DATABASE_URL=postgres://USER:PASSWORD@HOST:5432/DATABASE
 ```
 
@@ -92,3 +92,7 @@ The React widget now includes a Google Review Dashboard section showing:
 - `Review Left` is preserved and is not overwritten by later link opens.
 - Each Zoho organisation has its own server connection key and unique slug.
 - The backend stores only a hash of the server connection key.
+
+## Koyeb deployment
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for replacing the existing Koyeb service, environment variables, and Zoho widget upload. The configured API URL is `https://greview.koyeb.app` and the Zoho namespace is `googlereviewlink`.

@@ -22,24 +22,24 @@ if(module_api_name == null || crm_record_id == null)
 try
 {
 	record_data = zoho.crm.getRecordById(module_api_name, crm_record_id.toLong());
-	current_status = ifnull(record_data.get("googlereview__Review_Page_Open_Status"), "");
+	current_status = ifnull(record_data.get("googlereviewlink__Review_Page_Open_Status"), "");
 
 	update_fields = Map();
 	if(review_link != null && review_link != "")
 	{
-		update_fields.put("googlereview__Google_Review_Link", review_link);
+		update_fields.put("googlereviewlink__Google_Review_Link", review_link);
 	}
 	if(open_count != null)
 	{
-		update_fields.put("googlereview__Review_Page_Open_Count", open_count);
+		update_fields.put("googlereviewlink__Review_Page_Open_Count", open_count);
 	}
 	if(opened_at != null && opened_at != "")
 	{
-		update_fields.put("googlereview__Last_Review_Page_Opened_At", opened_at);
+		update_fields.put("googlereviewlink__Last_Review_Page_Opened_At", opened_at);
 	}
 	if(current_status != "Review Left" && open_status != null && open_status != "")
 	{
-		update_fields.put("googlereview__Review_Page_Open_Status", open_status);
+		update_fields.put("googlereviewlink__Review_Page_Open_Status", open_status);
 	}
 
 	if(update_fields.size() > 0)

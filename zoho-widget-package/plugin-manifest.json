@@ -1,9 +1,11 @@
 {
-  "locale": ["en"],
+  "locale": [
+    "en"
+  ],
   "service": "CRM",
   "storage": false,
   "whiteListedDomains": [
-    "https://gay-duck-jeznag-2d148b61.koyeb.app"
+    "https://greview.koyeb.app"
   ],
   "modules": {
     "widgets": [

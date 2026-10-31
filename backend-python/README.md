@@ -23,7 +23,7 @@ Required environment:
 
 ```text
 PORT=3000
-PUBLIC_BASE_URL=https://your-heroku-app.herokuapp.com
+PUBLIC_BASE_URL=https://greview.koyeb.app
 DATABASE_URL=postgres://USER:PASSWORD@HOST:5432/DATABASE
 ```
 
