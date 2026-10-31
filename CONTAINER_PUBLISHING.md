@@ -2,7 +2,7 @@
 
 The workflow publishes the Python backend to:
 
-`ghcr.io/euel-villavicencio/google-review-extension-backend-private`
+`ghcr.io/euel-villavicencio/google-review-extension`
 
 On `container-publishing`, it publishes `staging` and the full commit SHA.
 On `main`, it publishes `latest` and the full commit SHA. Prefer a commit tag or
@@ -13,11 +13,9 @@ until the existing Koyeb Git deployment has been migrated, since main currently
 triggers that service automatically.
 
 GitHub Actions uses its built-in GITHUB_TOKEN with contents:read and packages:write;
-no personal access token is required for publishing. The current package was
-reported PUBLIC by GitHub. The workflow now checks package visibility before
-publishing and refuses to publish unless it is private. Resolve privacy in the
-owner package settings or use a private-capable replacement registry before
-using this workflow for private source distribution.
+no personal access token is required for publishing. The workflow checks that
+`google-review-extension` is private before publishing and stops if it is public.
+The original package is the intended deployment source.
 
 Do not make the repository private until the existing public-repository Koyeb
 integration has been replaced or authenticated; doing so may break future builds.

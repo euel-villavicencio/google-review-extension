@@ -35,7 +35,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository_owner }}/google-review-extension-backend-private
+          images: ghcr.io/${{ github.repository_owner }}/google-review-extension
           tags: |
             type=sha,format=long,prefix=
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
@@ -47,7 +47,7 @@ jobs:
             const { data: pkg } = await github.request('GET /users/{username}/packages/{package_type}/{package_name}', {
               username: context.repo.owner,
               package_type: 'container',
-              package_name: 'google-review-extension-backend-private'
+              package_name: 'google-review-extension'
             });
             core.notice(`Container package visibility: ${pkg.visibility}`);
             if (pkg.visibility !== 'private') {
