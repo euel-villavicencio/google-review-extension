@@ -2,7 +2,7 @@
 
 The workflow publishes the Python backend to:
 
-`ghcr.io/euel-villavicencio/google-review-extension`
+`ghcr.io/euel-villavicencio/google-review-extension-backend-private`
 
 On `container-publishing`, it publishes `staging` and the full commit SHA.
 On `main`, it publishes `latest` and the full commit SHA. Prefer a commit tag or
