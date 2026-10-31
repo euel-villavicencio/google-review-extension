@@ -49,3 +49,16 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+      - name: Verify package is private
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pkg } = await github.request('GET /users/{username}/packages/{package_type}/{package_name}', {
+              username: context.repo.owner,
+              package_type: 'container',
+              package_name: context.repo.repo
+            });
+            core.notice(`Container package visibility: ${pkg.visibility}`);
+            if (pkg.visibility !== 'private') {
+              core.setFailed('Container package must be private. Check its GitHub package settings.');
+            }
